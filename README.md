@@ -1,2 +1,3 @@
-# BlogOfBaishisan
-my blog
+# Blog
+记点容易忘的东西
+
