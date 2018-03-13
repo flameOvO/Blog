@@ -1,6 +1,6 @@
 ###HTTP协议状态码
 
-##### 1XX信息响应
+##### 零、 1XX信息响应
 
 100 Continue
 这个临时响应表明，迄今为止的所有内容都是可行的，客户端应该继续请求，如果已经完成，则忽略它。
@@ -45,4 +45,16 @@
 
    1、500 Internal Server Error   服务端错误，有可能是WEB应用存在错误。
 
-​    2、503 Serveice Unavailable   服务器超负荷运行。
+​    2、502 Bad Gateway 作为网关或者代理工作的服务器尝试执行请求时，从上游服务器接收到无效的响应
+
+​    3、503 Serveice Unavailable   服务器超负荷运行。
+
+
+
+
+
+#### get
+
+GET提交，请求的数据会附在URL之后（就是把数据放置在HTTP协议头中），以?分割URL和传输数据，多个参数用&连接；例 如：login.action?name=hyddd&password=idontknow&verify=%E4%BD%A0 %E5%A5%BD。如果数据是英文字母/数字，原样发送，如果是空格，转换为+，如果是中文/其他字符，则直接把字符串用BASE64加密，得出如： %E4%BD%A0%E5%A5%BD，其中％XX中的XX为该符号以16进制表示的ASCII。
+
+####post
