@@ -29,3 +29,20 @@
 
 一般来说，`v-if` 有更高的切换开销，而 `v-show` 有更高的初始渲染开销。因此，如果需要非常频繁地切换，则使用 `v-show` 较好；如果在运行时条件很少改变，则使用 `v-if` 较好。
 
+
+
+
+
+
+
+```
+//为什么v-bind:class的第二个class需要加引号
+<div class="static"
+     v-bind:class="{ active: isActive, 'text-danger': hasError }">test
+</div>
+
+```
+
+因为 {}内的代码是要拿去当js解析的，js中变量是没有用 ' - '号连接
+就像 css中 font-size 是用 - 号连接
+到了js中 就必须用驼峰的写法
