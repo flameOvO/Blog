@@ -1,3 +1,47 @@
+### 会被默认继承的属性
+
+1. `azimuth`
+2. `border-collapse`
+3. `border-spacing`
+4. `caption-side`
+5. `color`
+6. `cursor`
+7. `direction`
+8. `elevation`
+9. `empty-cells`
+10. `font-family`
+11. `font-size`
+12. `font-style`
+13. `font-variant`
+14. `font-weight`
+15. `font`
+16. `letter-spacing`
+17. `line-height`
+18. `list-style-image`
+19. `list-style-position`
+20. `list-style-type`
+21. `list-style`
+22. `orphans`
+23. `pitch-range`
+24. `pitch`
+25. `quotes`
+26. `richness`
+27. `speak-header`
+28. `speak-numeral`
+29. `speak-punctuation`
+30. `speak`
+31. `speech-rate`
+32. `stress`
+33. `text-align`
+34. `text-indent`
+35. `text-transform`
+36. `visibility`
+37. `voice-family`
+38. `volume`
+39. `white-space`
+40. `widows`
+41. `word-spacing`
+
 #### DPR
 
 设备像素与CSS像素的比值。CSS像素是我们在CSS里设置像素大小。
@@ -101,6 +145,8 @@ box-shadow: 3px 3px red, -1em 0 0.4em olive;/*同时应用两种阴影*/
 
 #### border-radius
 
+该属性是一个 简写属性，是为了将这四个属性 border-top-left-radius、border-top-right-radius、border-bottom-right-radius，和 border-bottom-left-radius 简写为一个属性。
+
 border-radius: none　｜　length{1,4} / length{1,4} 
 其中每一个值可以为 数值或百分比的形式。 
 length/length　第一个lenght表示**水平方向**的半径，而第二个表示**竖直方向**的半径。弧度是
@@ -197,7 +243,7 @@ border-radius: top-left top-right bottom-right bottom-left /top-left top-right b
 
 ####  top right bottom left
 
-当元素定位非static时有效。
+当元素定位非static时有效。当left/bottom/right/top为百分比时，relative的偏移是相对包含块计算的。
 
 #### text-align
 

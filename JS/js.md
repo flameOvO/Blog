@@ -1,3 +1,177 @@
+#### 实现对象的不可改变
+
+四个方法，方法三，方法四是方法一与二的结合。
+
+1. 结合 writable:false 和 configurable:false 就可以创建一个真正的常量属性(不可修改、 重定义或者删除): 
+
+2. 禁止一个对象添加新属性并且保留已有属性，可以使用 Object.prevent Extensions(..): 
+
+   ```js
+   var myObject = { a:2
+        };
+        Object.preventExtensions( myObject );
+        myObject.b = 3;
+        myObject.b; // undefined
+   ```
+
+3. Object.seal(..) 会创建一个“密封”的对象，这个方法实际上会在一个现有对象上调用 Object.preventExtensions(..) 并把所有现有属性标记为 configurable:false。 
+
+4. Object.freeze(..) 会创建一个冻结对象，这个方法实际上会在一个现有对象上调用 Object.seal(..) 并把所有“数据访问”属性标记为 writable:false，这样就无法修改它们的值。 
+
+#### 属性描述符
+
+对象里目前存在的属性描述符有两种主要形式：**数据描述符**和**存取描述符**。
+
+**数据描述符**和**存取描述符**共有特性： `enumerable`(可枚举)和 `configurable`(可配置)。
+
+* configurable决定属性是否可配置。只要属性是可配置的，就可以使用 defineProperty(..) /delete方法来==删改==属性描述符。且修改configurable是单向的，因为configurable为false时，无法修改属性描述符。
+
+  <!--要注意有一个小小的例外:即便属性是 configurable:false，我们还是可以 把 writable 的状态由 true 改为 false，但是无法由 false 改为 true。--> 
+
+* Enumerable  这个描述符控制的是属性是否会出现在对象的属性枚举中 。
+
+**数据描述符**特有：
+
+`writable` 决定是否可以修改属性的值。 
+
+`value`该属性对应的值。**默认为 undefined**。
+
+**存取描述符**特有：
+
+`get`:一个给属性提供 getter 的方法，如果没有 getter 则为 `undefined`。当访问该属性时，该方法会被执行，方法执行时没有参数传入，但是会传入`this`对象
+
+`set`:一个给属性提供 setter 的方法，如果没有 setter 则为 `undefined`。当属性值修改时，触发执行该方法。该方法将接受唯一参数，即该属性新的参数值。
+
+#### this
+
+this 是在运行时进行绑定的，并不是在编写时绑定，它的上下文取决于函数调用时的各种条件。
+
+函数的不同使用场合，this有不同的值。总的来说，this就是函数运行时所在的环境对象。下面分四种情况。
+
+##### 独立函数调用
+
+把这条规则看作是无法应用其他规则时的默认规则。
+
+```js
+function foo() { 
+	console.log( this.a );
+}
+
+var a = 2; 
+foo(); // 2
+
+```
+
+##### 作为对象方法的调用(隐私绑定)
+
+```js
+//当函数引 用有上下文对象时，隐式绑定规则会把函数调用中的 this 绑定到这个上下文对象。
+function foo() { 
+    console.log( this.a );
+}
+var obj2 = { 
+    a: 42,
+	foo: foo 
+};
+var obj1 = { 
+    a: 2,
+	obj2: obj2 
+};
+obj1.obj2.foo(); // 42
+//对象属性引用链中只有最后一层会影响调用位置
+```
+
+##### call/apply方法(显示绑定)
+
+```js
+function foo() { 
+    console.log( this.a );
+}
+var obj = { 
+    a:2
+};
+foo.call( obj ); // 2
+```
+
+##### new绑定
+
+使用 new 来调用函数，或者说发生构造函数调用时，会自动执行下面的操作。 
+
+1. 创建(或者说构造)一个全新的对象。
+2. 这个新对象会被执行[[原型]]连接。
+3. 这个新对象会绑定到函数调用的this。
+4. 如果函数没有返回其他对象，那么new表达式中的函数调用会自动返回这个新对象。 
+
+##### 优先级
+
+new绑定 > call/apply方法(显示绑定) > 作为对象方法的调用(隐私绑定) > 函数调用（默认规则）
+
+##### 判断this
+
+如果要判断一个运行中函数的 this 绑定，就需要找到这个函数的直接调用位置。找到之后 
+
+就可以顺序应用下面这四条规则来判断 this 的绑定对象。 
+
+```js
+//1. 函数是否在new中调用(new绑定)?如果是的话this绑定的是新创建的对象。
+     var bar = new foo()
+//2. 函数是否通过call、apply(显式绑定)或者硬绑定调用?如果是的话，this绑定的是指定的对象。
+     var bar = foo.call(obj2)
+//3. 函数是否在某个上下文对象中调用(隐式绑定)?如果是的话，this 绑定的是那个上下文对象。
+     var bar = obj1.foo()
+//4. 如果都不是的话，使用默认绑定。如果在严格模式下，就绑定到undefined，否则绑定到全局对象。
+     var bar = foo()
+     
+//例外
+//1. null 或者 undefined 作为 this 的绑定对象传入 call、apply 或者 bind，这些值在调用时会被忽略，实际应用的是默认绑定规则:
+    function foo() { 
+         console.log( this.a );
+	}
+	var a = 2;
+	foo.call( null ); // 2
+//2. 一个函数的“间接引用”，在这 种情况下，调用这个函数会应用默认绑定规则。
+function foo() { 
+    console.log( this.a );
+}
+var a = 2;
+var o = { a: 3, foo: foo }; 
+var p = { a: 4 };
+o.foo(); // 3
+(p.foo = o.foo)(); // 2
+//3 箭头函数
+```
+
+
+
+#### 词法作用域和动态作用域
+
+两者区别在于，遇到自由变量，词法作用域是去==函数定义时的环境==查询，动态作用域到==函数调用时的环境==中查。
+
+```js
+//词法作用域
+function foo() { 
+    console.log( a ); // 2
+}
+function bar() { 
+    var a = 3;
+	foo(); 
+}
+var a = 2; 
+bar();
+//动态作用域
+function foo() {
+	console.log( a ); // 3(不是 2 !)
+}
+function bar() { 
+    var a = 3;
+	foo(); 
+}
+var a = 2; 
+bar();
+```
+
+
+
 #### 柯里化
 
 **1. 参数复用**；**2. 提前返回； 3. 延迟计算/运行**。、
@@ -58,6 +232,8 @@ addWeight();    //  这里才计算
 console.log(fishWeight);    // 12.5
 ```
 
+
+
 #### 浅拷贝
 
 -   如果该元素是个对象引用 （不是实际的对象）， 会拷贝这个对象引用到新的数组里。两个对象引用都引用了同一个对象。如果被引用的对象发生改变，则新的和原来的数组中的这个元素也会发生改变。
@@ -104,8 +280,6 @@ var fn = function(a) {
 这个作用域里面的变量，外面访问不到（即避免「变量污染」）。
 
 
-
-### call/apply/bind
 
 
 
@@ -362,3 +536,37 @@ String.fromCharCode()的逆操作
 ### String.prototype.trim()
 
 `trim`方法用于去除字符串**两端**的空格，返回一个**新字符串**，不改变原字符串。
+
+
+
+## Object
+
+### Object.assign
+
+`Object.assign(target, ...sources)` 方法用于将所有可枚举属性的值从一个或多个源对象==浅复制==到目标对象。它将返回目标对象。
+
+### Object.create
+
+`Object.create(prototype)`方法创建一个新对象，使用现有的对象来提供新创建的对象的\__proto__。 
+
+### Object.defineProperty()
+
+` Object.defineProperty(obj, prop, descriptor) `来在一个对象上添加一个新属性或者修改一个已有属性(如果它是 configurable)并对特性进行设置。 
+
+`Object.defineProperties(obj, props)`可以一个对象上对多个属性进行操作。
+
+### Object.keys()
+
+`Object.keys(obj)` 方法会返回一个由一个给定对象的==自身可枚举属性==组成的==**数组**==，数组中属性名的排列顺序和使用` for..in`循环遍历该对象时返回的顺序一致 。不会访问到原型链。
+
+### Object.getOwnPropertyNames()
+
+·`bject.getOwnPropertyNames(obj)`方法返回一个由指定对象的所有==自身属性的属性名==（包括不可枚举属性但不包括Symbol值作为名称的属性）组成的==数组==。`Object.keys()`的超集。
+
+### Object.prototype.hasOwnProperty
+
+`hasOwnProperty(prop)` 方法会返回一个**布尔值**，指示对象==**自身**==属性中是否具有指定的属性,不访问原型链
+
+### Object.prototype.propertyIsEnumerable()
+
+`propertyIsEnumerable(prop)` 方法返回一个布尔值，表示指定的属性是否可枚举。

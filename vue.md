@@ -46,3 +46,7 @@
 因为 {}内的代码是要拿去当js解析的，js中变量是没有用 ' - '号连接
 就像 css中 font-size 是用 - 号连接
 到了js中 就必须用驼峰的写法
+
+
+
+@font-face  CSS unicode-range特定字符使用font-face自定义字体
